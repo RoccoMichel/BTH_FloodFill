@@ -1,6 +1,5 @@
 import random
 
-
 def generateGrid(size, variantion):
     grid = []
     for _ in range(size):
@@ -20,22 +19,58 @@ def clamp(value, min, max):
     return value
 
 
+def getValuesLeft(grid, total):
+    left = 0
+    for i in range(total):
+        if i in grid:
+            left += 1
+    return left
+
+
 def getSquareValue(location, grid, squares): # linear not exponential 
     grid_size = len(squares)
     x = -1
     y = -1
 
     for i in range(grid_size):
-        if location.x >= squares[0][i].p1.x and location.x <= squares[0][i].p2.x:
+        if location.y >= squares[i][0].p1.y and location.y <= squares[i][0].p2.y:
             x = i
     for j in range(grid_size):
-        if location.y >= squares[j][0].p1.y and location.y <= squares[j][0].p2.y:
-            y = j    
+        if location.x >= squares[0][j].p1.x and location.x <= squares[0][j].p2.x:
+            y = j
 
-    if x == -1:
+    if x == -1 or y == -1:
         return None
     else:
         return grid[x][y]
+
+
+def color_fill(grid, boxes, startpoint, new_value):
+    compare_value = grid[startpoint[0]][startpoint[1]]
+    grid[startpoint[0]][startpoint[1]] = new_value
+    boxes[startpoint[0]][startpoint[1]].setFill(getColor(new_value))
+
+    # Check North
+    if startpoint[0]-1 >= 0:
+        if grid[startpoint[0]-1][startpoint[1]] == compare_value:
+            color_fill(grid, boxes, [startpoint[0]-1, startpoint[1]], new_value)
+
+    # Check South
+    if startpoint[0]+1 < len(grid):
+        if grid[startpoint[0]+1][startpoint[1]] == compare_value:
+            color_fill(grid, boxes, [startpoint[0]+1, startpoint[1]], new_value)     
+
+    # Check West
+    if startpoint[1]-1 >= 0:
+        if grid[startpoint[0]][startpoint[1]-1] == compare_value:
+            print("LEFT")
+            color_fill(grid, boxes, [startpoint[0], startpoint[1]-1], new_value)
+
+    # Check East
+    if startpoint[1]+1 < len(grid):
+        if grid[startpoint[0]][startpoint[1]+1] == compare_value:
+            print("RIGHT")
+            color_fill(grid, boxes, [startpoint[0], startpoint[1]+1], new_value)  
 
     
 def getColor(index): # index is int
