@@ -2,14 +2,17 @@ import graphics
 import methods
 
 # Game Settings:
-SIZE = 6
-COLORS = 8 # max support for 8
-MAXTURNS = 5
+SIZE = 8
+COLORS = 7 # max support for 8
+MAXTURNS = 15
 
 # Visual Settings:
 WIDTH = 500
 HEIGHT = 750
 BACKGROUNDCOLOR = "DarkOrchid3"
+BOXSIZE = 25
+BOXMARGIN = 0
+BOXOUTLINE = 1
 
 def colorfill():
     pass
@@ -21,6 +24,7 @@ if __name__ == "__main__":
     # Variables:
     turns = MAXTURNS
     grid = methods.generateGrid(SIZE, COLORS)
+    squares = []
 
     # Create window
     window = graphics.GraphWin(f"Flood Fill Game\t(Rocco Michel)", WIDTH, HEIGHT)
@@ -39,47 +43,59 @@ if __name__ == "__main__":
     title.draw(window)
     status.draw(window)
 
-    # Grid
-    box_size = 45
-    box_margin = 2
-    box_outline = 0
-    grid_length = box_size * SIZE + box_margin * (SIZE-1)
+    # Draw Grid
+    grid_length = BOXSIZE * SIZE + BOXMARGIN * (SIZE-1)
     grid_start = graphics.Point(WIDTH/2 - grid_length/2, HEIGHT/8)
     
     for i in range(SIZE):
-        for j in range(SIZE):
-            p1 = graphics.Point(grid_start.x + (box_size * j) + (box_margin * j), grid_start.y + (box_size * i) + ((box_margin+1) * i))
-            p2 = graphics.Point(grid_start.x + (box_size * (j+1)) + (box_margin * j), grid_start.y + box_size + (box_size * i+1) + ((box_margin+1) * i))
+        squres_row = []
+        for j in range(SIZE):            
+            p1 = graphics.Point(grid_start.x + (BOXSIZE * j) + (BOXMARGIN * j), grid_start.y + (BOXSIZE * i) + ((BOXMARGIN+1) * i))
+            p2 = graphics.Point(grid_start.x + (BOXSIZE * (j+1)) + (BOXMARGIN * j), grid_start.y + BOXSIZE + (BOXSIZE * i+1) + ((BOXMARGIN+1) * i))
             square = graphics.Rectangle(p1, p2)
             square.setFill(methods.getColor(grid[j][i])) 
-            square.setWidth(box_outline)
+            square.setWidth(BOXOUTLINE)
             square.draw(window)
+
+            squres_row.append(square)
+        squares.append(squres_row)
     
-    # Test Circle
-    circle_center = graphics.Point(window.width/2, window.height/2)
-    circle = graphics.Circle(circle_center, 25)
-    circle.setFill("red")
-    circle.setWidth(7)
-    circle.draw(window)
     #input_box = graphics.Entry(graphics.Point(30, 40), 5)
     #input_box.draw(window)
 
-    # Loop
-    while turns > 0:
-        point = window.getMouse()
-        # change grind based on player input send as parameter?
+    # Game Loop
+    player_input = ""
+    previous_input = ""
+    while turns > 0:   
+        # Mouse Input     
+        mouse_input = window.getMouse()
+        grid_p1 = squares[0][0].p1
+        grid_p2 = squares[SIZE-1][SIZE-1].p2
 
-        turns -= 1
-        status.setText(get_status())
-        circle.move(-circle.getP1().x, -circle.getP1().y)
-        circle.move(point.x, point.y)
+        if mouse_input.x > grid_p1.x and mouse_input.x < grid_p2.x and mouse_input.y > grid_p1.y and mouse_input.y < grid_p2.y:
+            player_input = methods.getSquareValue(mouse_input, grid, squares)
 
+        if player_input == None:
+            player_input = previous_input
+
+        # Handle Input
+        if previous_input != player_input:
+            print(player_input, " | ", methods.getColor(player_input))
+
+            # UPDATE GRID SOMEHOW ----------------------------------------------------
+            
+            turns -= 1
+            status.setText(get_status())
+
+            previous_input = player_input
 
     # Save Highscore
     file = open("highscores.txt", 'w')
     file.write(f"Highscore: {MAXTURNS - turns}")
     file.close()
 
+    # End
+    window.close()
 
 
 # 1. Spelet ska hålla reda på antalet drag som spelaren har gjort.
